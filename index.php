@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<?php
+include("admin/bd.php");
+
+$sentencia = $conexion->prepare("SELECT * FROM tbl_banners limit 1");
+$sentencia->execute();
+$lista_banners = $sentencia->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -116,9 +124,16 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
-            <h1 class="display-4">La Sombra</h1>
-            <p class="lead">Restaurant del mejor sabor casero</p>
-            <a href="#menu" class="btn btn-primary cta-button">Ver Menú</a>
+            <?php
+                foreach($lista_banners as $banner) {
+            ?>
+            <h1 class="display-4"><?php echo $banner['titulo']; ?></h1>
+            <p class="lead"><?php echo $banner['descripcion']; ?></p>
+
+            <a href="#menu" class="btn btn-primary cta-button"><?php echo $banner['link']; ?></a>
+            <?php
+                }
+            ?>
         </div>
     </section>
 
@@ -204,12 +219,6 @@
                 </div>
             </div>
         </div>
-    </section>
-
-    <section>
-        <h2 class="text-center">
-
-        </h2>
     </section>
 
     <!-- Bootstrap JS -->

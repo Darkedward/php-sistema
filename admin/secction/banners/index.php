@@ -1,62 +1,62 @@
 <?php
 include("../../bd.php");
 
-// Corrección en la consulta SQL
-$sentencia = $conexion->prepare("SELECT * FROM tbl_banners"); // Quité las comillas simples alrededor de 'tbl_banners'
+// Manejo seguro para la eliminación de registros
+if (isset($_GET['txtID'])) {
+    $txtID = (isset($_GET["txtID"])) ? $_GET["txtID"] : "";
+    $sentencia = $conexion->prepare("DELETE FROM tbl_banners WHERE id=:id");
+    $sentencia->bindParam(":id", $txtID);
+    $sentencia->execute();
+     // Redirigimos al índice después de insertar
+    header("Location: index.php");
+}
+
+
+// Obtención de los registros desde la base de datos
+$sentencia = $conexion->prepare("SELECT * FROM tbl_banners");
 $sentencia->execute();
-
-// Corrección en la obtención de resultados
 $lista_banners = $sentencia->fetchAll(PDO::FETCH_ASSOC);
-
-
 
 include("../../templat/header.php");
 ?>
 
-
-
 <div class="card">
     <div class="card-header">
-
-
-        <a name="" id="" class="btn btn-primary" href="crear.php" role="button">crear</a>
-
+        <a name="" id="" class="btn btn-primary" href="crear.php" role="button">Crear</a>
     </div>
     <div class="card-body">
         <div class="table-responsive-sm">
             <table class="table table-primary">
                 <thead>
-                    <tr class="">
-                        <td scope="col">ID</td>
-                        <td scope="col">Titulo</td>
-                        <td scope="col">Description</td>
-                        <td scope="col">Enlace</td>
-                        <td scope="col">Acciones</td>
-
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Título</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Enlace</th>
+                        <th scope="col">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="">
-                        <?php 
-                        foreach($lista_banners as $key=>$value){?>
-                        <td scope="row"><?php echo $value['id'];?></td>
-                        <td><?php echo $value['titulo'];?></td>
-                        <td><?php echo $value['descripcion'];?></td>
-                        <td><?php echo $value['link'];?></td>
-                        <td><a name="" id="" class="btn btn-primary" href="editar.php" role="button">editar</a>
+                    <?php foreach ($lista_banners as $value): ?>
+                    <tr>
+                        <td scope="row"><?php echo htmlspecialchars($value['id'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($value['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($value['descripcion'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td><?php echo htmlspecialchars($value['link'], ENT_QUOTES, 'UTF-8'); ?></td>
+                        <td>
+                            <a name="" id="" class="btn btn-primary" href="editar.php?txtID=<?php echo $value['id']; ?>"
+                                role="button">Editar</a>
+                            <a name="" id="" class="btn btn-danger" href="index.php?txtID=<?php echo $value['id']; ?>"
+                                role="button"
+                                onclick="return confirm('¿Estás seguro de que deseas borrar este banner?');">Borrar</a>
                         </td>
-                        <td><a name="" id="" class="btn btn-primary" href="#" role="button">borrar</a>
                     </tr>
-                    <?php }?>
-
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
-
     </div>
-    <div class="card-footer text-muted">
-
-    </div>
+    <div class="card-footer text-muted"></div>
 </div>
 
 <?php
