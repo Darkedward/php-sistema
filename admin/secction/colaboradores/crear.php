@@ -10,34 +10,37 @@ if ($_POST) {
     $linkfacebook = isset($_POST["linkfacebook"]) ? $_POST["linkfacebook"] : "";
     $linkinstragram = isset($_POST["linkinstragram"]) ? $_POST["linkinstragram"] : "";
     $linklinkedin = isset($_POST["linklinkedin"]) ? $_POST["linklinkedin"] : "";
+
     $foto = isset($_FILES["foto"]["name"]) ? $_FILES["foto"]["name"] : "";
+    $fecha_foto = new DateTime();
+    $nombre_foto = $fecha_foto->getTimestamp() . "_" . $foto;
+    $temp_foto = $_FILES["foto"]["tmp_name"];
+    
+    // Subimos la imagen si está disponible
+    if ($temp_foto != "") {
+        move_uploaded_file($temp_foto,"../../../imagenes/colaboradores/".$nombre_foto);
+    }
 
     // Validamos que los campos requeridos no estén vacíos
     if (!empty($titulo) && !empty($description)) {
         try {
-            // Subimos la foto si está disponible
-            if (!empty($foto)) {
-                $target_dir = "../../uploads/";
-                $target_file = $target_dir . basename($foto);
-                move_uploaded_file($_FILES["foto"]["tmp_name"], $target_file);
-            }
-
             // Preparamos la consulta
             $sentencia = $conexion->prepare(
-                "INSERT INTO `tbl_colaboradores` (`id`, `titulo`, `descripcion`, `foto`, `linkfacebook`, `linkinstragram`, `linklinkedin`) 
-                 VALUES (NULL, :titulo, :descripcion, :foto, :linkfacebook, :linkinstragram, :linklinkedin);"
+                "INSERT INTO `tbl_colaboradores` (`id`, `titulo`, `description`, `linkfacebook`, `linkinstragram`, `linklinkedin`, `foto`) 
+                 VALUES (NULL, :titulo, :description, :linkfacebook, :linkinstragram, :linklinkedin, :foto);"
             );
 
             // Asignamos los parámetros
             $sentencia->bindParam(":titulo", $titulo);
-            $sentencia->bindParam(":descripcion", $description);
-            $sentencia->bindParam(":foto", $foto);
+            $sentencia->bindParam(":description", $description);
+            $sentencia->bindParam(":foto", $nombre_foto);
             $sentencia->bindParam(":linkfacebook", $linkfacebook);
             $sentencia->bindParam(":linkinstragram", $linkinstragram);
             $sentencia->bindParam(":linklinkedin", $linklinkedin);
 
             // Ejecutamos la consulta
             $sentencia->execute();
+            
 
             // Redirigimos al índice después de insertar
             header("Location: index.php");
@@ -64,12 +67,12 @@ if ($_POST) {
 
             <div class="mb-3">
                 <label for="titulo" class="form-label">Titulo:</label>
-                <input type="text" class="form-control" name="titulo" id="titulo" placeholder="" />
+                <input type="text" class="form-control" name="titulo" id="titulo" placeholder="" required />
             </div>
 
             <div class="mb-3">
                 <label for="description" class="form-label">Descripcion:</label>
-                <input type="text" class="form-control" name="description" id="description" placeholder="" />
+                <input type="text" class="form-control" name="description" id="description" placeholder="" required />
             </div>
 
             <div class="mb-3">
